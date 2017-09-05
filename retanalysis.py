@@ -40,9 +40,9 @@ def far_inst_seq(address_dists):
     too_far_instructions = (far_dist/len(address_dists)) > percent/100
     if(too_far_instructions):
         print "*******************************************************"
-        print "!!! Too far distances !!!"
+        print "!!! Too large distances !!!"
         print address_dists
-        print "far distances: " + str((far_dist/len(address_dists))*100) + "%"
+        print "large distances: " + str((far_dist/len(address_dists))*100) + "%"
         print "*******************************************************"
         return True
     return False
@@ -84,14 +84,14 @@ def main():
                 fifo.pop(0)
                 address_dists.pop(0)
 
-                interval_alarm = too_short_intervals(fifo, line_number)
+                interval_alert = too_short_intervals(fifo, line_number)
 
-                distance_alarm = True if(args.nodist or not interval_alarm) else far_inst_seq(address_dists)
+                distance_alert = True if(args.nodist or not interval_alert) else far_inst_seq(address_dists)
                 if(single_detection):
-                    if(interval_alarm and distance_alarm):
+                    if(interval_alert and distance_alert):
                         rop_det = True
                         break
-                rop_det = rop_det or (interval_alarm and distance_alarm)
+                rop_det = rop_det or (interval_alert and distance_alert)
 
             if("ret" in line or ("jmp" in line and "ptr" in line)):
                 curr_addr = int(line.split()[0], 16)
