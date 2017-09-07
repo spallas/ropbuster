@@ -9,14 +9,20 @@ def too_short_intervals(intervals, line_number):
     super_short = 2
     percent = 90
     sshort_percent = 50
+    max_gadget_len = 16
 
     short_intervals = 0
     super_short_ints = 0
+    indx = 0
     for i in intervals:
         if(i < short):
             short_intervals += 1
         if(i < super_short):
             super_short_ints += 1
+        # check that the too long gadget is actually inside the gadget chain
+        if(i > max_gadget_len and indx not in [1,2,3,14,15,16]):
+            return False
+        indx += 1
 
     too_shorts = (short_intervals/len(intervals)) > percent/100
     too_super_shorts = (super_short_ints/len(intervals)) > sshort_percent/100
@@ -32,10 +38,10 @@ def too_short_intervals(intervals, line_number):
     return False
 
 def far_inst_seq(address_dists):
-    percent = 80
+    percent = 40
     far_dist = 0
     for i in address_dists:
-        if(i > 0x1000):
+        if(i > 0xf000):
             far_dist += 1
     too_far_instructions = (far_dist/len(address_dists)) > percent/100
     if(too_far_instructions):
