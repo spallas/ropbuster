@@ -20,7 +20,7 @@ def too_short_intervals(intervals, line_number):
         if(i < super_short):
             super_short_ints += 1
         # check that the too long gadget is actually inside the gadget chain
-        if(i > max_gadget_len and indx not in [1,2,3,14,15,16]):
+        if(i > max_gadget_len and indx not in [1,2,3,13,14,15]):
             return False
         indx += 1
 
@@ -39,16 +39,16 @@ def too_short_intervals(intervals, line_number):
 
 def far_inst_seq(address_dists):
     percent = 40
-    far_dist = 0
+    large_dists = 0
     for i in address_dists:
         if(i > 0xf000):
-            far_dist += 1
-    too_far_instructions = (far_dist/len(address_dists)) > percent/100
+            large_dists += 1
+    too_far_instructions = (large_dists/len(address_dists)) > percent/100
     if(too_far_instructions):
         print "*******************************************************"
         print "!!! Too large distances !!!"
         print address_dists
-        print "large distances: " + str((far_dist/len(address_dists))*100) + "%"
+        print "large distances: " + str((large_dists/len(address_dists))*100) + "%"
         print "*******************************************************"
         return True
     return False

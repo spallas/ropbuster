@@ -25,12 +25,15 @@ INT32 short_val = 3;
 INT32 super_short = 2;
 INT32 percent = 90;
 INT32 sshort_percent = 50;
+INT32 dist_percent = 40;
+INT32 dist_threshold = 0xf000;
+ADDRINT last_addr = 0;
 
 INT32 ret_window_size = 16;
 INT32 interval_len = 0;
-BOOL rop_det = FALSE;
 
 std::list<INT32> fifo;
+std::list<INT32> address_dists;
 
 /* ===================================================================== */
 // Command line switches
@@ -87,11 +90,18 @@ BOOL TooShortIntervals(std::list<INT32> intervals) {
 	//cerr << "Called" << "\t";
     INT32 short_intervals = 0;
     INT32 super_short_ints = 0;
+    INT32 max_gadget_len = 16;
     INT32 len = (INT32) intervals.size();
 
+    INT32 indx = 0;
     for (std::list<int>::iterator it=intervals.begin(); it != intervals.end(); ++it) {
         if(*it < short_val) short_intervals++;
         if(*it < super_short) super_short_ints++;
+        if(*it > max_gadget_len && indx!=1 && indx!=2
+            && indx!=3 && indx!=13 && indx!=14 && indx!=15) {
+            return FALSE;
+        }
+        indx++;
     }
 
     BOOL too_shorts = (((float) short_intervals)/len) > (((float) percent)/100);
@@ -109,8 +119,30 @@ BOOL TooShortIntervals(std::list<INT32> intervals) {
 }
 
 
-VOID InstructionTrace(TRACE trace, INS ins) {
+BOOL TooLargeDistances(std::list<INT32> dists) {
 
+    INT32 large_dists = 0;
+    INT32 len = (INT32) dists.size();
+
+    for (std::list<int>::iterator it=dists.begin(); it != dists.end(); ++it) {
+        if(*it > dist_threshold) large_dists++;
+    }
+
+    BOOL too_far_instructions = (((float) large_dists)/len) > (((float) dist_percent)/100);
+
+    if(too_far_instructions) {
+        *out << "*******************************************************"<< endl;
+        *out << "!!! Too far instructions !!!" << endl;
+        *out << "large distances: " << (((float) large_dists)/len)*100 << "%" <<endl;
+        *out << "*******************************************************"<< endl;
+        return TRUE;
+    }
+    return FALSE;
+
+}
+
+
+VOID InstructionTrace(TRACE trace, INS ins) {
     // ADDRINT addr = INS_Address(ins);
     // ASSERTX(addr);
     // string astring = FormatAddress(INS_Address(ins), TRACE_Rtn(trace));
@@ -119,20 +151,27 @@ VOID InstructionTrace(TRACE trace, INS ins) {
 
     if(fifo.size() > ret_window_size) {
         fifo.pop_front();
-        rop_det = rop_det || TooShortIntervals(fifo);
+        address_dists.pop_front();
+        BOOL interval_alert = TooShortIntervals(fifo);
+        if(interval_alert) {
+            BOOL distance_alert = TooLargeDistances(address_dists);
+            if(distance_alert) {
+                *out << "ROP DETECTED!" << endl;
+            	*out << "Exiting Program..." << endl;
+            	exit(-1);
+            }
+        }
     }
 
     if(INS_IsRet(ins)) {
+        ADDRINT addr = INS_Address(ins);
+        INT32 dist = abs((int)(addr - last_addr));
         fifo.push_back(interval_len);
+        address_dists.push_back(dist);
         interval_len = 0;
+        last_addr = addr;
     } else {
         interval_len++;
-    }
-
-    if(rop_det) {
-        *out << "ROP DETECTED!" << endl;
-		*out << "Exiting Program..." << endl;
-		exit(-1);
     }
 }
 
