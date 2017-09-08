@@ -23,14 +23,15 @@ std::ostream * out = &cerr;
 // heuristic parameters
 INT32 short_val = 3;
 INT32 super_short = 2;
-INT32 percent = 90;
+INT32 percent = 75;
 INT32 sshort_percent = 50;
-INT32 dist_percent = 40;
-INT32 dist_threshold = 0xf000;
+INT32 dist_percent = 49;
+INT32 dist_threshold = 0xfff0;
 ADDRINT last_addr = 0;
 
-INT32 ret_window_size = 16;
+INT32 ret_window_size = 14;
 INT32 interval_len = 0;
+INT32 max_gadget_len = 16;
 
 std::list<INT32> fifo;
 std::list<INT32> address_dists;
@@ -90,15 +91,13 @@ BOOL TooShortIntervals(std::list<INT32> intervals) {
 	//cerr << "Called" << "\t";
     INT32 short_intervals = 0;
     INT32 super_short_ints = 0;
-    INT32 max_gadget_len = 16;
     INT32 len = (INT32) intervals.size();
 
     INT32 indx = 0;
     for (std::list<int>::iterator it=intervals.begin(); it != intervals.end(); ++it) {
         if(*it < short_val) short_intervals++;
         if(*it < super_short) super_short_ints++;
-        if(*it > max_gadget_len && indx!=1 && indx!=2
-            && indx!=3 && indx!=13 && indx!=14 && indx!=15) {
+        if(*it > max_gadget_len && indx!=13 && indx!=12 && indx!=11 && indx!=10) {
             return FALSE;
         }
         indx++;
@@ -112,7 +111,10 @@ BOOL TooShortIntervals(std::list<INT32> intervals) {
         *out << "!!! Too short intervals !!!" << endl;
         *out << "short intervals: " << (((float) short_intervals)/len)*100 << "%" <<endl;
         *out << "super short intervals: " << (((float) super_short_ints)/len)*100 << "%" <<endl;
-        *out << "======================================================="<< endl;
+		for (std::list<int>::iterator it=intervals.begin(); it != intervals.end(); ++it) {
+			*out << *it << " ";
+		}
+        *out << endl << "======================================================="<< endl;
         return TRUE;
     }
     return FALSE;
@@ -237,12 +239,11 @@ int main(int argc, char *argv[])
     // Register function to be called when the application exits
     PIN_AddFiniFunction(Fini, 0);
 
-    cerr <<  "===============================================" << endl;
+    cerr <<  "=======================================================" << endl;
     cerr <<  "This application is analised by ropdet" << endl;
     if (!KnobOutputFile.Value().empty()) {
         cerr << "See file " << KnobOutputFile.Value() << " for analysis results" << endl;
     }
-    cerr <<  "===============================================" << endl;
 
     // Start the program, never returns
     PIN_StartProgram();
