@@ -20,13 +20,13 @@ def too_short_intervals(intervals, line_number):
         if(i < super_short):
             super_short_ints += 1
         # check that the too long gadget is actually inside the gadget chain
-        if(i > max_gadget_len and indx not in [1,2,3,13,14,15]):
+        if(i > max_gadget_len and indx not in [10, 11, 12, 13]):
             return False
         indx += 1
 
     too_shorts = (short_intervals/len(intervals)) > percent/100
     too_super_shorts = (super_short_ints/len(intervals)) > sshort_percent/100
-    if(too_shorts and too_super_shorts):
+    if(too_shorts): #and too_super_shorts):
         print "======================================================="
         print "!!! Too short intervals !!!"
         print "short intervals: " + str((short_intervals/len(intervals))*100)+"%"
@@ -38,10 +38,10 @@ def too_short_intervals(intervals, line_number):
     return False
 
 def far_inst_seq(address_dists):
-    percent = 40
+    percent = 49
     large_dists = 0
     for i in address_dists:
-        if(i > 0xf000):
+        if(i > 0xfff0):
             large_dists += 1
     too_far_instructions = (large_dists/len(address_dists)) > percent/100
     if(too_far_instructions):
@@ -53,12 +53,21 @@ def far_inst_seq(address_dists):
         return True
     return False
 
+def check_same_instuctions(gadgets):
+
+    return False
+
+def get_instruction(line):
+    # TODO: ...
+    return line
+
 def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("file_name", help="Name of the file, or base name without serial number")
     parser.add_argument("-s", "--single", action="store_true", help="Process single file")
     parser.add_argument("-nodist", action="store_true", help="Omit ret instructions distance heuristic")
+    parser.add_argument("-norepeat", action="store_true", help="Omit dummy repeating gadgets detection")
     parser.add_argument("-n", type=int, help="Number of files to process")
     args = parser.parse_args()
 
@@ -70,7 +79,7 @@ def main():
         trace_file = open(file_name, "r")
 
     # heuristic parameter
-    ret_window_size = 16 #int(sys.argv[3])
+    ret_window_size = 14
 
     for i in range(files_num):
         if(files_num > 1):
@@ -80,6 +89,8 @@ def main():
 
         fifo = []
         address_dists = []
+        gadgets = []
+        current_gadget = []
         interval_len = 0
         rop_det = False
         line_number = 0
@@ -89,25 +100,30 @@ def main():
             if(len(fifo) > ret_window_size):
                 fifo.pop(0)
                 address_dists.pop(0)
+                gadgets.pop(0)
 
                 interval_alert = too_short_intervals(fifo, line_number)
 
                 distance_alert = True if(args.nodist or not interval_alert) else far_inst_seq(address_dists)
+                nodummy_alert  = True if(args.norepeat or not interval_alert) else check_same_instuctions(gadgets)
                 if(single_detection):
-                    if(interval_alert and distance_alert):
+                    if(interval_alert and distance_alert and nodummy_alert):
                         rop_det = True
                         break
-                rop_det = rop_det or (interval_alert and distance_alert)
+                rop_det = rop_det or (interval_alert and distance_alert and nodummy_alert)
 
             if("ret" in line or ("jmp" in line and "ptr" in line)):
                 curr_addr = int(line.split()[0], 16)
                 addr_dist = abs(curr_addr - prev_addr)
-                fifo.append(interval_len)
                 address_dists.append(addr_dist)
-                interval_len = 0
+                fifo.append(interval_len)
+                gadgets.append(current_gadget)
                 prev_addr = curr_addr
+                interval_len = 0
+                curent_gadget = []
             else:
                 interval_len += 1
+                current_gadget.append(get_instruction(line))
 
             line_number += 1
 
