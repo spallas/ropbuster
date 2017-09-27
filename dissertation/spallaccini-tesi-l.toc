@@ -1,0 +1,23 @@
+\contentsline {chapter}{Introduction}{ix}{chapter*.2}
+\contentsline {chapter}{\numberline {1}Technical Background}{1}{chapter.1}
+\contentsline {section}{\numberline {1.1}Basic Concepts}{1}{section.1.1}
+\contentsline {section}{\numberline {1.2}Stack Smashing: buffer overflow vulnerabilities attacks and defences}{2}{section.1.2}
+\contentsline {section}{\numberline {1.3}Ret-to-libc}{4}{section.1.3}
+\contentsline {section}{\numberline {1.4}Return Oriented Programming}{5}{section.1.4}
+\contentsline {section}{\numberline {1.5}Using ROP to disable DEP in Windows}{6}{section.1.5}
+\contentsline {chapter}{\numberline {2}Design}{9}{chapter.2}
+\contentsline {section}{\numberline {2.1}Problem definition}{9}{section.2.1}
+\contentsline {section}{\numberline {2.2}Existing ROP mitigations and defences}{9}{section.2.2}
+\contentsline {section}{\numberline {2.3}Tool overview}{10}{section.2.3}
+\contentsline {section}{\numberline {2.4}Version 0.1}{10}{section.2.4}
+\contentsline {section}{\numberline {2.5}Version 1.0}{12}{section.2.5}
+\contentsline {section}{\numberline {2.6}Version 2.0}{13}{section.2.6}
+\contentsline {chapter}{\numberline {3}Implementation}{17}{chapter.3}
+\contentsline {section}{\numberline {3.1}Intel Pin Framework}{17}{section.3.1}
+\contentsline {section}{\numberline {3.2}Code Insights}{17}{section.3.2}
+\contentsline {section}{\numberline {3.3}Parameter Effects}{19}{section.3.3}
+\contentsline {chapter}{\numberline {4}Evaluation}{23}{chapter.4}
+\contentsline {section}{\numberline {4.1}Testing environment}{23}{section.4.1}
+\contentsline {section}{\numberline {4.2}What we learned from tests}{23}{section.4.2}
+\contentsline {chapter}{\numberline {5}Conclusions and Related work}{27}{chapter.5}
+\contentsline {section}{\numberline {5.1}Possible future improvements}{27}{section.5.1}
